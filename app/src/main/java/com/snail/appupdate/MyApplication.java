@@ -15,7 +15,7 @@ import com.snail.appupdate.appupdate.update.IAppUpdate;
  */
 public class MyApplication extends Application implements IUpdateApplication{
     private final String TAG = MyApplication.class.getSimpleName();
-    private final String APP_PROCESS_NAME = "com.snail.jadeite";
+    private final String APP_PROCESS_NAME = "com.snail.appupdate";
     private static MyApplication application;
     @Override
     public void onCreate() {
