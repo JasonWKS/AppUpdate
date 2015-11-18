@@ -56,12 +56,13 @@ public class MyApplication extends Application implements IUpdateApplication{
             VersionManager.getInstance().checkUpdate(new VersionCallback() {
                 @Override
                 public void success(IAppUpdate updateBean) {
+                    Log.i(TAG,"versionCallback.success");
                     VersionManager.getInstance().onUpdate();
                 }
 
                 @Override
                 public void fail(String result) {
-
+                    Log.i(TAG,"versionCallback.fail, result = " + result);
                 }
             });
         }catch (Exception ex){
