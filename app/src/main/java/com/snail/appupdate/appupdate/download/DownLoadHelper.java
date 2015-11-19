@@ -258,39 +258,48 @@ public class DownLoadHelper {
 
     // 获取下载id对应的详情
     public DownloadMess getDownloadMess(Long id){
-        DownloadMess mess = null;
-        DownloadManager.Query query = new DownloadManager.Query();
-        query.setFilterById(id);
-        int status1 = DownloadManager.STATUS_RUNNING
-                | DownloadManager.STATUS_PAUSED
-                | DownloadManager.STATUS_SUCCESSFUL
-                | DownloadManager.STATUS_FAILED;
-        query.setFilterByStatus(status1);
-        Cursor cursor= downloadManager.query(query);
-        if (cursor.moveToFirst()){
-            mess = new DownloadMess();
-            String downId= cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
-            String title = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
-            String des = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
-            String localuri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-            String url = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI));
-            long status = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
-            String size= cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-            String sizeTotal = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-            String fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-            mess.setId(Long.parseLong(downId));
-            mess.setContent(des);
-            mess.setLocal_uri(localuri);
-            mess.setSize(size);
-            mess.setSizeTotal(sizeTotal);
-            mess.setStatus(status);
-            mess.setUri(url);
-            mess.setTitle(title);
-            mess.setFileName(fileName);
+        Cursor cursor = null;
+        try{
+            DownloadMess mess = null;
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(id);
+            int status1 = DownloadManager.STATUS_RUNNING
+                    | DownloadManager.STATUS_PAUSED
+                    | DownloadManager.STATUS_SUCCESSFUL
+                    | DownloadManager.STATUS_FAILED;
+            query.setFilterByStatus(status1);
+            cursor= downloadManager.query(query);
+            if (cursor.moveToFirst()){
+                mess = new DownloadMess();
+                String downId= cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
+                String title = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
+                String des = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
+                String localuri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                String url = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI));
+                long status = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                String size= cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                String sizeTotal = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                String fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+                mess.setId(Long.parseLong(downId));
+                mess.setContent(des);
+                mess.setLocal_uri(localuri);
+                mess.setSize(size);
+                mess.setSizeTotal(sizeTotal);
+                mess.setStatus(status);
+                mess.setUri(url);
+                mess.setTitle(title);
+                mess.setFileName(fileName);
+            }
+            //        print(cursor);
+            return mess;
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }finally {
+            if(cursor != null){
+                cursor.close();
+            }
         }
-//        print(cursor);
-        cursor.close();
-        return mess;
+        return null;
     }
 
     private void print(Cursor c){
@@ -350,26 +359,34 @@ public class DownLoadHelper {
     }
 
     private void queryDownTask() {
-        DownloadManager.Query query = new DownloadManager.Query();
+        Cursor cursor = null;
+        try{
+            DownloadManager.Query query = new DownloadManager.Query();
 //        query.setFilterByStatus(status);
-        Cursor cursor= downloadManager.query(query);
-        while(cursor.moveToNext()){
-            String downId= cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
-            String localuri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-            String url = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI));
-            if(localuri != null && localuri.contains(java.io.File.separator + DownLoadContacts.DOWNLOAD_SUBPATH)){
-                File f = new File(localuri);
-                if(f.isFile()){
-                    download_urls_ids.clear();
-                    download_urls_ids.put(url, Long.parseLong(downId));
+            cursor= downloadManager.query(query);
+            while(cursor.moveToNext()){
+                String downId= cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
+                String localuri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                String url = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI));
+                if(localuri != null && localuri.contains(java.io.File.separator + DownLoadContacts.DOWNLOAD_SUBPATH)){
+                    File f = new File(localuri);
+                    if(f.isFile()){
+                        download_urls_ids.clear();
+                        download_urls_ids.put(url, Long.parseLong(downId));
+                    }else{
+                        removeDownload(Long.parseLong(downId));
+                    }
                 }else{
                     removeDownload(Long.parseLong(downId));
                 }
-            }else{
-                removeDownload(Long.parseLong(downId));
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }finally {
+            if(cursor != null){
+                cursor.close();
             }
         }
-        cursor.close();
     }
 
     public void registerListener(boolean databaseObserver){
